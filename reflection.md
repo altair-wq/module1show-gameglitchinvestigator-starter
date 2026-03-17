@@ -16,32 +16,30 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 
 ## 2. How did you use AI as a teammate?
 
-- Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)?
-- Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
-- Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).
+- Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)? I used GitHub Copilot and ChatGPT. Copilot helped me inside VS Code with explaining functions and suggesting code fixes, while ChatGPT helped me understand bugs conceptually and plan how to fix them step by step.
+- Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result). Copilot correctly identified that the check_guess function had reversed hint messages, where a guess that was too high told the player to go higher instead of lower. I verified this by reading the code, fixing the messages, and then testing both manually and with pytest to confirm the hints behaved correctly.
+- Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).One AI suggestion was to refactor multiple parts of the app at once instead of focusing on specific bugs. This was misleading because it would make debugging harder by mixing many changes together. I verified this by comparing it to my debugging approach and chose to fix one bug at a time instead, which made it easier to test and confirm each fix.
 
 ---
 
 ## 3. Debugging and testing your fixes
 
-- How did you decide whether a bug was really fixed?
-- Describe at least one test you ran (manual or using pytest)  
-  and what it showed you about your code.
-- Did AI help you design or understand any tests? How?
+- How did you decide whether a bug was really fixed? I considered a bug fixed only when both the code behavior and the game UI matched the expected logic. I tested each fix manually in the Streamlit app to see if the gameplay behaved correctly, and I also checked that the underlying function produced the right output. If both matched, I treated the bug as resolved.
+- Describe at least one test you ran (manual or using pytest) and what it showed you about your code. I wrote pytest tests for the check_guess function. For example, I tested that when the guess is 60 and the secret is 50, the outcome is "Too High" and the message contains "LOWER". This confirmed that the hint logic was correctly fixed and no longer reversed.
+- Did AI help you design or understand any tests? How? Yes, AI helped me generate the initial structure of the pytest tests and suggested what cases to include (win, too high, too low). However, I had to adjust the imports and verify that the tests matched my refactored logic_utils.py. This showed me that AI can help draft tests, but I still need to understand the code to make them run correctly.
 
 ---
 
 ## 4. What did you learn about Streamlit and state?
 
-- In your own words, explain why the secret number kept changing in the original app.
-- How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
-- What change did you make that finally gave the game a stable secret number?
+- In your own words, explain why the secret number kept changing in the original app. The secret number kept changing because Streamlit reruns the entire script every time the user interacts with the app. If the secret number is not properly stored in st.session_state, it can be regenerated on each rerun, or updated inconsistently when other parts of the code execute.
+- How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit? I would explain that Streamlit works by re-running the whole Python script every time the user clicks a button or enters input. st.session_state acts like memory that stores values between these reruns, so important data like the secret number or score doesn’t reset every time the app refreshes.
+- What change did you make that finally gave the game a stable secret number? I made sure the secret number is stored in st.session_state and only generated when needed, such as at the start of the game, when the user clicks “New Game,” or when the difficulty changes. This prevented the secret from changing unexpectedly during normal gameplay.
 
 ---
 
 ## 5. Looking ahead: your developer habits
 
-- What is one habit or strategy from this project that you want to reuse in future labs or projects?
-  - This could be a testing habit, a prompting strategy, or a way you used Git.
-- What is one thing you would do differently next time you work with AI on a coding task?
-- In one or two sentences, describe how this project changed the way you think about AI generated code.
+- What is one habit or strategy from this project that you want to reuse in future labs or projects? One habit I want to reuse is fixing one bug at a time and testing it immediately before moving on. This helped me clearly connect each change to its effect and avoid breaking other parts of the code. It also made debugging more structured and less overwhelming.
+- What is one thing you would do differently next time you work with AI on a coding task? Next time, I would use more focused prompts from the beginning and avoid accepting large refactors early. I learned that smaller, targeted AI suggestions are easier to verify and integrate without introducing new bugs.
+- In one or two sentences, describe how this project changed the way you think about AI generated code. This project showed me that AI-generated code can look correct but still contain multiple logical bugs. AI is useful for debugging and generating ideas, but I need to verify every suggestion and understand the code myself before trusting it.

@@ -1,68 +1,11 @@
 import random
 import streamlit as st
-
-def get_range_for_difficulty(difficulty: str):
-    if difficulty == "Easy":
-        return 1, 20
-    if difficulty == "Normal":
-        return 1, 100
-    if difficulty == "Hard":
-        return 1, 50
-    return 1, 100
-
-
-def parse_guess(raw: str):
-    if raw is None:
-        return False, None, "Enter a guess."
-
-    if raw == "":
-        return False, None, "Enter a guess."
-
-    try:
-        if "." in raw:
-            value = int(float(raw))
-        else:
-            value = int(raw)
-    except Exception:
-        return False, None, "That is not a number."
-
-    return True, value, None
-
-
-def check_guess(guess, secret):
-    if guess == secret:
-        return "Win", "🎉 Correct!"
-
-    try:
-        if guess > secret:
-            return "Too High", "📈 Go HIGHER!"
-        else:
-            return "Too Low", "📉 Go LOWER!"
-    except TypeError:
-        g = str(guess)
-        if g == secret:
-            return "Win", "🎉 Correct!"
-        if g > secret:
-            return "Too High", "📈 Go HIGHER!"
-        return "Too Low", "📉 Go LOWER!"
-
-
-def update_score(current_score: int, outcome: str, attempt_number: int):
-    if outcome == "Win":
-        points = 100 - 10 * (attempt_number + 1)
-        if points < 10:
-            points = 10
-        return current_score + points
-
-    if outcome == "Too High":
-        if attempt_number % 2 == 0:
-            return current_score + 5
-        return current_score - 5
-
-    if outcome == "Too Low":
-        return current_score - 5
-
-    return current_score
+from logic_utils import (
+    get_range_for_difficulty,
+    parse_guess,
+    check_guess,
+    update_score,
+)
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
 
@@ -86,12 +29,30 @@ attempt_limit = attempt_limit_map[difficulty]
 
 low, high = get_range_for_difficulty(difficulty)
 
+# FIX: Reset the game when difficulty changes so the secret number
+# always matches the selected mode's valid range.
+# This prevents cases like Easy mode showing a secret number above 20.
+if "last_difficulty" not in st.session_state:
+    st.session_state.last_difficulty = difficulty
+elif st.session_state.last_difficulty != difficulty:
+    st.session_state.last_difficulty = difficulty
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.attempts = 0
+    st.session_state.score = 0
+    st.session_state.status = "playing"
+    st.session_state.history = []
+    st.success(f"Difficulty changed to {difficulty}. New game started.")
+    st.rerun()
+
 st.sidebar.caption(f"Range: {low} to {high}")
 st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
 
+# FIX: Initialize the secret number inside session state
+# so it stays stable across Streamlit reruns.
 if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
+# NOTE: Attempts are tracked in session state so they persist across reruns.
 if "attempts" not in st.session_state:
     st.session_state.attempts = 1
 
@@ -106,8 +67,10 @@ if "history" not in st.session_state:
 
 st.subheader("Make a guess")
 
+# FIX: Updated the displayed range so the UI matches the selected difficulty,
+# instead of always incorrectly showing 1 to 100.
 st.info(
-    f"Guess a number between 1 and 100. "
+    f"Guess a number between {low} and {high}. "
     f"Attempts left: {attempt_limit - st.session_state.attempts}"
 )
 
@@ -132,8 +95,14 @@ with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
 if new_game:
+    # FIX: Fully reset the game state when starting a new game.
+    # Before, only the secret number changed, while score/history/status stayed stale.
     st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.score = 0
+    st.session_state.status = "playing"
+    st.session_state.history = []
+    st.session_state.last_difficulty = difficulty
     st.success("New game started.")
     st.rerun()
 
@@ -152,13 +121,17 @@ if submit:
     if not ok:
         st.session_state.history.append(raw_guess)
         st.error(err)
+
+    # FIX: Reject guesses outside the selected difficulty range.
+    # Before, guesses like 120 could still be processed even in smaller ranges.
+    elif not (low <= guess_int <= high):
+        st.session_state.history.append(guess_int)
+        st.error(f"Guess must be between {low} and {high}.")
     else:
         st.session_state.history.append(guess_int)
 
-        if st.session_state.attempts % 2 == 0:
-            secret = str(st.session_state.secret)
-        else:
-            secret = st.session_state.secret
+        # FIX: Always compare numbers, not strings
+        secret = st.session_state.secret
 
         outcome, message = check_guess(guess_int, secret)
 

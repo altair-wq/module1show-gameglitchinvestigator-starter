@@ -25,13 +25,13 @@ It wrote the code, ran away, and now the game is unplayable.
 
 ## 📝 Document Your Experience
 
-- [ ] Describe the game's purpose.
-- [ ] Detail which bugs you found.
-- [ ] Explain what fixes you applied.
+- [x] Describe the game's purpose. This project is a number guessing game built with Streamlit, where the player selects a difficulty and tries to guess a randomly generated secret number within a limited number of attempts. The goal is to receive hints (“higher” or “lower”) and find the correct number efficiently.
+- [x] Detail which bugs you found. I identified several issues in the original AI-generated code. The “New Game” button did not fully reset the game state, so score, history, and status carried over between rounds. The hint logic was reversed, causing incorrect feedback (e.g., telling the player to go higher when the guess was already too high). The app also allowed guesses outside the difficulty range and sometimes generated a secret number that did not match the selected difficulty. Additionally, the secret number logic was unstable due to how Streamlit reruns handled state.
+- [x] Explain what fixes you applied. I refactored the core logic into logic_utils.py to separate game logic from UI. I fixed the reversed hint logic in check_guess and ensured all comparisons use numeric values. I updated the “New Game” button to fully reset attempts, score, status, and history. I added logic to reset the game when difficulty changes, ensuring the secret number always matches the selected range. I also enforced input validation so guesses must fall within the allowed range. Finally, I added pytest tests to verify that the core logic behaves correctly.
 
 ## 📸 Demo
 
-- [ ] [Insert a screenshot of your fixed, winning game here]
+- [x] [![alt text](image.png)]
 
 ## 🚀 Stretch Features
 
