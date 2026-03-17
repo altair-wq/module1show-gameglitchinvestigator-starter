@@ -35,4 +35,5 @@ It wrote the code, ran away, and now the game is unplayable.
 
 ## 🚀 Stretch Features
 
-- [ ] [If you choose to complete Challenge 4, insert a screenshot of your Enhanced Game UI here]
+- [x] I tested additional edge cases for input parsing, including empty input, non-numeric text, negative numbers, decimals, and very large values. This helped me verify that the game logic handles unusual user input more gracefully and made me think more carefully about what counts as valid input.
+ [![alt text](image-1.png)]
